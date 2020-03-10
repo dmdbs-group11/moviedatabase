@@ -9,9 +9,9 @@ public abstract class DBConn{
         try{
             Class.forName("com.mysql.cj.jdbc.Driver");
             Properties p = new Properties();
-            p.put("user", "hermannm");
-            p.put("password", "root");
-            conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1/moviedatabase?autoReconnect=true&useSSL=false", p);
+            p.put("user", "root");
+            p.put("password", "huskdette");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedatabase?autoReconnect=true&useSSL=false", p);
         } catch (Exception e){
             System.out.println(e.getMessage());
         }
