@@ -1,18 +1,20 @@
-package moviedatabase.src.app;
+package app;
 
-import java.util.List;
+import javafx.application.Application;
+import javafx.stage.Stage;
 
-public class App {
+public class App extends Application{
+    GUI gui;
+	public App() {
+		gui = new GUI();
+	}
+	public void start(Stage stage) {
+		stage.setTitle("Movie database");
+		gui.setStage(stage);
+		stage.setScene(gui.menuScene());
+		stage.show();
+	}
     public static void main(String[] args) throws Exception {
-        ActorCtrl actorCtrl = new ActorCtrl();
-        actorCtrl.connect();
-        List<String> hermannsRoller = actorCtrl.fetchRoles("Hermann");
-        for(String rolle : hermannsRoller){
-            System.out.println(rolle);
-        }
-        List<String> hermannsFilmer = actorCtrl.fetchMovies("Hermann");
-        for(String film : hermannsFilmer){
-            System.out.println(film);
-        }
+        launch(args);
     }
 }

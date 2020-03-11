@@ -1,4 +1,4 @@
-package moviedatabase.src.app;
+package app;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -32,5 +32,19 @@ public class ActorCtrl extends DBConn{
             System.out.println("Database error when selecting for movie titles:\n" + e.getMessage());
         }
         return movieTitles;
+    }
+    public List<String> fetchAllActors(){
+        List<String> allActors = new ArrayList<>();
+        try{
+            Statement statement = conn.createStatement();
+            String query = "select FilmPerson.Navn from (FilmPerson natural join RolleIFilm)";
+            ResultSet result = statement.executeQuery(query);
+            while(result.next()){
+                allActors.add(result.getString("Navn"));
+            }
+        }catch(Exception e){
+            System.out.println("Database error when selecting for all actors:\n" + e.getMessage());
+        }
+        return allActors;
     }
 }
