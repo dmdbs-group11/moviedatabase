@@ -13,7 +13,7 @@ public abstract class DBConn{
             p.put("password", "huskdette");
             conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/moviedatabase?autoReconnect=true&useSSL=false", p);
         } catch (Exception e){
-            System.out.println(e.getMessage());
+            System.out.println(e);
         }
     }
 }

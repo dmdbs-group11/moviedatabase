@@ -9,13 +9,13 @@ public class ActorCtrl extends DBConn{
         List<String> roleNames = new ArrayList<>();
         try{
             Statement statement = conn.createStatement();
-            String query = "select RolleIFilm.Rollenavn from (RolleIFilm natural join FilmPerson) where FilmPerson.Navn='" + actorName + "'";
+            String query = "select RolleIFilm.Rollenavn from (RolleIFilm natural join FilmPerson) where FilmPerson.Navn='" + actorName + "';";
             ResultSet result = statement.executeQuery(query);
             while(result.next()){
                 roleNames.add(result.getString("Rollenavn"));
             }
         }catch(Exception e){
-            System.out.println("Database error when selecting for role names:\n" + e.getMessage());
+            System.out.println("Database error when selecting for role names:\n" + e);
         }
         return roleNames;
     }
