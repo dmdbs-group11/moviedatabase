@@ -1,4 +1,4 @@
-package app;
+package moviedatabase.src.app;
 
 import java.sql.*;
 import java.util.Map;
