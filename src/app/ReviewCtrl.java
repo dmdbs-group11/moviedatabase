@@ -1,42 +1,67 @@
 package app;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
 
 public class ReviewCtrl extends DBConn{
-    public void giveReview(String AnmeldelsesID, String Tekst, String Rating, String BID, String SerieID, String SesongID, String FilmID){
-        insertReview(AnmeldelsesID, Tekst, Rating, BID);
-        insertRelation(AnmeldelsesID, SerieID, SesongID, FilmID);
+    public void giveReview(String Tekst, Integer Rating, Integer BID, Integer SerieID, Integer SesongID, Integer FilmID){
+        int anmeldelsesID = uniqueID("AnmeldelsesID", "Anmeldelse");
+        insertReview(anmeldelsesID, Tekst, Rating, BID);
+        if (SerieID != null){
+            insertSerieAnmeldelse(anmeldelsesID, SerieID);
+        }
+        else if(SesongID != null){
+            insertSesongAnmeldelse(anmeldelsesID, SesongID);
+        }
+        else if(FilmID != null){
+            insertFilmAnmeldelse(anmeldelsesID, FilmID);
+        }else{    
+            System.out.println("Nå har du failet (i livet)");
+        }
+
     }
 
-    public void insertReview(String AnmeldelsesID, String Tekst, String Rating, String BID){
+    public void insertReview(Integer AnmeldelsesID, String Tekst, Integer Rating, Integer BID){
         try{
-            Statement statement = conn.createStatement();   
-            String query = "insert into Anmeldelse values(" + AnmeldelsesID + ", '" + Tekst + "', " + Rating + ", " + BID + ")";
-            statement.executeQuery(query);
+            PreparedStatement regstatement = conn.prepareStatement("insert into Anmeldelse values( (?), (?), (?), (?))");
+            regstatement.setInt(1, AnmeldelsesID);
+            regstatement.setString(2, Tekst);
+            regstatement.setInt(3, Rating);
+            regstatement.setInt(4, BID);
+            regstatement.execute();
         }catch(Exception e){
             System.out.println("Database error when inserting review:\n" + e);
         }
     }
 
-    public void insertRelation(String AnmeldelsesID, String SerieID, String SesongID, String FilmID){
+    public void insertSerieAnmeldelse(Integer AnmeldelsesID, Integer SerieID){
         try{
-            Statement statement = conn.createStatement();
-            String query = "";
-            if (SerieID != null){
-                query = "insert into SerieAnmeldelse values(" + AnmeldelsesID + ", " + SerieID + ")";
-            }
-            else if(SesongID != null){
-                query = "insert into SesongAnmeldelse values(" + AnmeldelsesID + ", " + SesongID + ")";
-            } 
-            else if(FilmID != null){
-                query = "insert into FilmAnmeldelse values(" + AnmeldelsesID + ", " + FilmID + ")";
-            } 
-            else{
-                System.out.print("Nå har du gjort noe feil her");
-            }
-            statement.executeQuery(query);
+            PreparedStatement regstatement = conn.prepareStatement("insert into SerieAnmeldelse values(?, ?)");  
+                regstatement.setInt(1, AnmeldelsesID);
+                regstatement.setInt(2, SerieID);
+            regstatement.execute();
         }catch(Exception e){
         System.out.println("Database error when inserting review relation:\n" + e);
+        }
     }
+
+    public void insertSesongAnmeldelse(Integer AnmeldelsesID, Integer SesongID){
+        try{
+            PreparedStatement regstatement = conn.prepareStatement("insert into SesongAnmeldelse values(?, ?)");  
+                regstatement.setInt(1, AnmeldelsesID);
+                regstatement.setInt(2, SesongID);
+            regstatement.execute();
+        }catch(Exception e){
+        System.out.println("Database error when inserting review relation:\n" + e);
+        }
+    }
+    public void insertFilmAnmeldelse(Integer AnmeldelsesID, Integer FilmID){
+        try{
+            PreparedStatement regstatement = conn.prepareStatement("insert into FilmAnmeldelse values(?, ?)");  
+                regstatement.setInt(1, AnmeldelsesID);
+                regstatement.setInt(2, FilmID);
+            regstatement.execute();
+        }catch(Exception e){
+        System.out.println("Database error when inserting review relation:\n" + e);
+        }
     }
 }

@@ -37,10 +37,10 @@ public class ActorCtrl extends DBConn{
         List<FilmPerson> filmPersons = new ArrayList<>();
         try{
             Statement statement = conn.createStatement();
-            String query = "select PID, Navn, Fodselsaar, Fodselsland, Regissor, Skuespiller, Manusforfatter from FilmPerson";
+            String query = "select * from FilmPerson";
             ResultSet result = statement.executeQuery(query);
             while(result.next()){
-                filmPersons.add(new FilmPerson(Integer.parseInt(result.getString("PID")), result.getString("Navn"), result.getString("Fodselsaar"), result.getString("Fodselsland"), Boolean.parseBoolean(result.getString("Regissor")), Boolean.parseBoolean(result.getString("Skuespiller")), Boolean.parseBoolean(result.getString("Manusforfatter"))));
+                filmPersons.add(new FilmPerson(Integer.parseInt(result.getString("PID")), result.getString("Navn"), result.getString("Fodselsaar"), result.getString("Fodselsland"), "1".equalsIgnoreCase(result.getString("Regissor")), "1".equalsIgnoreCase(result.getString("Skuespiller")), "1".equalsIgnoreCase(result.getString("Manusforfatter"))));
             }
         }catch(Exception e){
             System.out.println("Database error when selecting for all actors:\n" + e);

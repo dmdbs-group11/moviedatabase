@@ -74,4 +74,34 @@ public class ProductionCtrl extends DBConn{
 
         return genreLeadingCompanies;
     }
+
+    public List<Sesong> fetchSeasons(){
+        List<Sesong> seasons = new ArrayList<>();
+        try{
+            Statement statement = conn.createStatement();   
+            String query = "select * from Sesong";
+            ResultSet result = statement.executeQuery(query);
+            while(result.next()){
+                seasons.add(new Sesong(Integer.parseInt(result.getString("SesongID")), result.getString("Tittel"), result.getString("Storyline"), Integer.parseInt(result.getString("SerieID"))));
+            }
+        }catch(Exception e){
+            System.out.println("Database error when fetching all companies:\n" + e);
+        }
+        return seasons;
+    }
+
+    public List<Selskap> fetchCompanies(){
+        List<Selskap> companies = new ArrayList<>();
+        try{
+            Statement statement = conn.createStatement();   
+            String query = "select * from Selskap";
+            ResultSet result = statement.executeQuery(query);
+            while(result.next()){
+                companies.add(new Selskap(Integer.parseInt(result.getString("SelskapsID")), result.getString("Selskapsnavn"), result.getString("URL"), result.getString("adresse"), result.getString("land")));
+            }
+        }catch(Exception e){
+            System.out.println("Database error when fetching all companies:\n" + e);
+        }
+        return companies;
+    }
 }

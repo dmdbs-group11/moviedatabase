@@ -13,40 +13,61 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class GUI{
-    List<FilmPerson> filmPersons;
-    List<FilmPerson> actors;
-    List<FilmPerson> directors;
-    List<FilmPerson> authors;
+    Map<String, FilmPerson> filmPersons = new HashMap<>();
+    Map<String, FilmPerson> actors = new HashMap<>();
+    Map<String, FilmPerson> directors = new HashMap<>();
+    Map<String, FilmPerson> authors = new HashMap<>();
+    Map<String, Selskap> companies = new HashMap<>();
     private Stage stage;
     private ActorCtrl actorCtrl;
     private ProductionCtrl productionCtrl;
     public GUI(){
         actorCtrl = new ActorCtrl();
+        actorCtrl.connect();
         productionCtrl = new ProductionCtrl();
+        productionCtrl.connect();
         updateFilmPersons();
+        updateCompanies();
+        for(String directorName : directors.keySet()){
+            System.out.println(directorName);
+        }
+        for(String actorName : actors.keySet()){
+            System.out.println(actorName);
+        }
+        for(String authorName : authors.keySet()){
+            System.out.println(authorName);
+        }
     }
     public void updateFilmPersons(){
-        filmPersons = actorCtrl.fetchFilmPersons();
-        directors = new ArrayList<>();
-        actors = new ArrayList<>();
-        authors = new ArrayList<>();
-        for(FilmPerson filmPerson : filmPersons){
+        List<FilmPerson> filmPersonList = actorCtrl.fetchFilmPersons();
+        for(FilmPerson filmPerson : filmPersonList){
+            filmPersons.put(filmPerson.getName(), filmPerson);
             if(filmPerson.isDirector()){
-                directors.add(filmPerson);
+                directors.put(filmPerson.getName(), filmPerson);
             }
             if(filmPerson.isActor()){
-                actors.add(filmPerson);
+                actors.put(filmPerson.getName(), filmPerson);
             }
             if(filmPerson.isAuthor()){
-                authors.add(filmPerson);
+                authors.put(filmPerson.getName(), filmPerson);
             }
+        }
+    }
+    public void updateCompanies(){
+        List<Selskap> companyList = productionCtrl.fetchCompanies();
+        for(Selskap selskap : companyList){
+            companies.put(selskap.getName(), selskap);
         }
     }
     public void setStage(Stage stage){
@@ -76,7 +97,7 @@ public class GUI{
     }
     public Scene actorInfoScene(){
         Label actorInfoTitle = new Label("See what's new with your favorite actors");
-        ComboBox<FilmPerson> allActors = new ComboBox<>(FXCollections.observableList(actors));
+        ComboBox<String> allActors = new ComboBox<>(FXCollections.observableList(new ArrayList<>(actors.keySet())));
         Button seeActorRoles = new Button("See roles of selected actor");
         Button seeActorMovies = new Button("See movies of selected actor");
         return new Scene(standardLayout(true, new VBox(actorInfoTitle, allActors, seeActorRoles, seeActorMovies)));
@@ -110,35 +131,27 @@ public class GUI{
         for(String role : roles){
             Label roleLabel = new Label(role + "s: ");
             VBox roleContainer = new VBox();
-            List<FilmPerson> comboBoxList = new ArrayList<>();
-            switch (role) {
-                case "Director":
-                    comboBoxList = directors;
-                case "Author":
-                    comboBoxList = authors;
-                case "Actor":
-                    comboBoxList = actors;
+            Set<String> comboBoxContent = new HashSet<>();
+            if(role == "Director"){
+                comboBoxContent = directors.keySet();
+            }else if(role == "Actor"){
+                comboBoxContent = actors.keySet();
+            }else if(role == "Author"){
+                comboBoxContent = authors.keySet();
             }
-            ComboBox<FilmPerson> existing = new ComboBox<>(FXCollections.observableList(comboBoxList));
-            existing.setConverter(new StringConverter<FilmPerson>(){
-                public String toString(FilmPerson filmPerson){
-                    return filmPerson.getName();
-                }
-                public FilmPerson fromString(String string){
-                    return existing.getItems().stream().filter(p -> p.getName().equals(string)).findFirst().orElse(null);
-                }
-            });
+            ComboBox<String> existing = new ComboBox<>(FXCollections.observableList(new ArrayList<>(comboBoxContent)));
             Button addExisting = new Button("Add " + role);
             addExisting.setOnAction(e -> {
                 switch (role) {
                     case "Director":
-                        directorsToAdd.add(existing.getValue());
-                    case "Author":
-                        authorsToAdd.add(existing.getValue());
+                        directorsToAdd.add(directors.get(existing.getValue()));
                     case "Actor":
-                        actorsToAdd.add(existing.getValue());
+                        actorsToAdd.add(actors.get(existing.getValue()));
+                    case "Author":
+                        authorsToAdd.add(authors.get(existing.getValue()));
                 }
-                roleContainer.getChildren().add(new Label(existing.getValue().getName()));
+                roleContainer.getChildren().add(new Label(existing.getValue()));
+                existing.getItems().remove(existing.getValue());
             });
             HBox existingContainer = new HBox(existing, addExisting);
             existingContainer.setSpacing(10);
@@ -147,8 +160,8 @@ public class GUI{
 
         VBox newPersonContainer = new VBox();
         newPersonContainer.setSpacing(10);
-        Button newRole = new Button("Add new person");
-        newRole.setOnAction(e -> {
+        Button newPerson = new Button("Add new person");
+        newPerson.setOnAction(e -> {
             TextField nameField = new TextField();
             nameField.setPromptText("Name");
             TextField birthYearField = new TextField();
@@ -167,9 +180,11 @@ public class GUI{
             roleRow.setSpacing(10);
             newPersonContainer.getChildren().add(roleRow);
         });
-        
+
+        Label companyLabel = new Label("Production company: ");
+        ComboBox<String> companySelect = new ComboBox<>(FXCollections.observableList(new ArrayList<>(companies.keySet())));
         Button addMovieButton = new Button("Add movie");
-        return new Scene(standardLayout(true, new VBox(movieTitle, movieTitleField, lengthField, publicationYearField, publicationDateField, storylineField, onVideoCheck, rolesContainer, addMovieButton)));
+        return new Scene(standardLayout(true, new VBox(movieTitle, movieTitleField, lengthField, publicationYearField, publicationDateField, storylineField, onVideoCheck, rolesContainer, newPersonContainer, newPerson, companyLabel, companySelect, addMovieButton)));
     }
     public Scene genreLeadingCompaniesScene(){
         TableView<String> table = new TableView<>();
