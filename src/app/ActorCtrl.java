@@ -29,22 +29,22 @@ public class ActorCtrl extends DBConn{
                 movieTitles.add(result.getString("Tittel"));
             }
         }catch(Exception e){
-            System.out.println("Database error when selecting for movie titles:\n" + e.getMessage());
+            System.out.println("Database error when selecting for movie titles:\n" + e);
         }
         return movieTitles;
     }
-    public List<String> fetchAllActors(){
-        List<String> allActors = new ArrayList<>();
+    public List<FilmPerson> fetchFilmPersons(){
+        List<FilmPerson> filmPersons = new ArrayList<>();
         try{
             Statement statement = conn.createStatement();
-            String query = "select FilmPerson.Navn from (FilmPerson natural join RolleIFilm)";
+            String query = "select PID, Navn, Fodselsaar, Fodselsland, Regissor, Skuespiller, Manusforfatter from FilmPerson";
             ResultSet result = statement.executeQuery(query);
             while(result.next()){
-                allActors.add(result.getString("Navn"));
+                filmPersons.add(new FilmPerson(Integer.parseInt(result.getString("PID")), result.getString("Navn"), result.getString("Fodselsaar"), result.getString("Fodselsland"), Boolean.parseBoolean(result.getString("Regissor")), Boolean.parseBoolean(result.getString("Skuespiller")), Boolean.parseBoolean(result.getString("Manusforfatter"))));
             }
         }catch(Exception e){
-            System.out.println("Database error when selecting for all actors:\n" + e.getMessage());
+            System.out.println("Database error when selecting for all actors:\n" + e);
         }
-        return allActors;
+        return filmPersons;
     }
 }

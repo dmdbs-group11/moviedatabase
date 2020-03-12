@@ -17,6 +17,10 @@ public class DBTesting{
         for(String film : hermannsFilmer){
             System.out.println(film);
         }
+        List<FilmPerson> filmPersons = actorCtrl.fetchFilmPersons();
+        for(FilmPerson filmPerson : filmPersons){
+            System.out.println(filmPerson);
+        }
         Map<String, String> genreLeadingCompanies = prodctrl.fetchGenreLeadingCompanies();
         for (String key : genreLeadingCompanies.keySet()){
             System.out.println(key + ":" + genreLeadingCompanies.get(key));

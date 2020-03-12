@@ -13,28 +13,47 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class GUI{
-    List<String> testList = new ArrayList<>(Arrays.asList("Hermann", "Jorunn", "Airin"));
+    List<FilmPerson> filmPersons;
+    List<FilmPerson> actors;
+    List<FilmPerson> directors;
+    List<FilmPerson> authors;
     private Stage stage;
     private ActorCtrl actorCtrl;
     private ProductionCtrl productionCtrl;
     public GUI(){
         actorCtrl = new ActorCtrl();
         productionCtrl = new ProductionCtrl();
+        updateFilmPersons();
+    }
+    public void updateFilmPersons(){
+        filmPersons = actorCtrl.fetchFilmPersons();
+        directors = new ArrayList<>();
+        actors = new ArrayList<>();
+        authors = new ArrayList<>();
+        for(FilmPerson filmPerson : filmPersons){
+            if(filmPerson.isDirector()){
+                directors.add(filmPerson);
+            }
+            if(filmPerson.isActor()){
+                actors.add(filmPerson);
+            }
+            if(filmPerson.isAuthor()){
+                authors.add(filmPerson);
+            }
+        }
     }
     public void setStage(Stage stage){
         this.stage = stage;
     }
     public void updateScene(Scene scene){
         stage.setScene(scene);
-    }
-    public void updateFilmPersons(){
-
     }
     public Scene menuScene(){
         Button goToActorInfo = new Button("See info about actors");
@@ -57,7 +76,7 @@ public class GUI{
     }
     public Scene actorInfoScene(){
         Label actorInfoTitle = new Label("See what's new with your favorite actors");
-        ComboBox<String> allActors = new ComboBox<>(FXCollections.observableList(testList));
+        ComboBox<FilmPerson> allActors = new ComboBox<>(FXCollections.observableList(actors));
         Button seeActorRoles = new Button("See roles of selected actor");
         Button seeActorMovies = new Button("See movies of selected actor");
         return new Scene(standardLayout(true, new VBox(actorInfoTitle, allActors, seeActorRoles, seeActorMovies)));
@@ -69,6 +88,9 @@ public class GUI{
         return new Scene(standardLayout(true, new VBox(reviewTitle, review, submitReview)));
     }
     public Scene addMovieScene(){
+        List<FilmPerson> directorsToAdd = new ArrayList<>();
+        List<FilmPerson> actorsToAdd = new ArrayList<>();
+        List<FilmPerson> authorsToAdd = new ArrayList<>();
         Label movieTitle = new Label("Add a movie");
         TextField movieTitleField = new TextField();
         movieTitleField.setPromptText("Movie title");
@@ -88,43 +110,63 @@ public class GUI{
         for(String role : roles){
             Label roleLabel = new Label(role + "s: ");
             VBox roleContainer = new VBox();
-            roleContainer.setSpacing(10);
-            Button newRole = new Button("Add new " + role.toLowerCase());
-            newRole.setOnAction(e -> {
-                TextField nameField = new TextField();
-                nameField.setPromptText("Name");
-                TextField birthYearField = new TextField();
-                birthYearField.setPromptText("Birthyear");
-                TextField countryField = new TextField();
-                countryField.setPromptText("Country of birth");
-                Button addRole = new Button("Add");
-                addRole.setOnAction(e2 -> {
-                    //actorCtrl.addPerson(nameField.getText(), birthYearField.getText(), countryField.getText());
-                    updateFilmPersons();
-                });
-                HBox roleRow = new HBox(nameField, birthYearField, countryField, addRole);
-                roleRow.setSpacing(10);
-                roleContainer.getChildren().add(roleRow);
-            });
-            List<String> comboBoxList = new ArrayList<>();
+            List<FilmPerson> comboBoxList = new ArrayList<>();
             switch (role) {
                 case "Director":
-                    comboBoxList = testList;
+                    comboBoxList = directors;
                 case "Author":
-                    comboBoxList = testList;
+                    comboBoxList = authors;
                 case "Actor":
-                    comboBoxList = testList;
+                    comboBoxList = actors;
             }
-            ComboBox<String> existing = new ComboBox<>(FXCollections.observableList(comboBoxList));
+            ComboBox<FilmPerson> existing = new ComboBox<>(FXCollections.observableList(comboBoxList));
+            existing.setConverter(new StringConverter<FilmPerson>(){
+                public String toString(FilmPerson filmPerson){
+                    return filmPerson.getName();
+                }
+                public FilmPerson fromString(String string){
+                    return existing.getItems().stream().filter(p -> p.getName().equals(string)).findFirst().orElse(null);
+                }
+            });
             Button addExisting = new Button("Add " + role);
             addExisting.setOnAction(e -> {
-                Label added = new Label(existing.getValue());
-                roleContainer.getChildren().add(added);
+                switch (role) {
+                    case "Director":
+                        directorsToAdd.add(existing.getValue());
+                    case "Author":
+                        authorsToAdd.add(existing.getValue());
+                    case "Actor":
+                        actorsToAdd.add(existing.getValue());
+                }
+                roleContainer.getChildren().add(new Label(existing.getValue().getName()));
             });
             HBox existingContainer = new HBox(existing, addExisting);
             existingContainer.setSpacing(10);
-            rolesContainer.getChildren().addAll(roleLabel, roleContainer, newRole, existingContainer);
+            rolesContainer.getChildren().addAll(roleLabel, roleContainer, existingContainer);
         }
+
+        VBox newPersonContainer = new VBox();
+        newPersonContainer.setSpacing(10);
+        Button newRole = new Button("Add new person");
+        newRole.setOnAction(e -> {
+            TextField nameField = new TextField();
+            nameField.setPromptText("Name");
+            TextField birthYearField = new TextField();
+            birthYearField.setPromptText("Birthyear");
+            TextField countryField = new TextField();
+            countryField.setPromptText("Country of birth");
+            CheckBox directorCheck = new CheckBox("Director");
+            CheckBox actorCheck = new CheckBox("Actor");
+            CheckBox authorCheck = new CheckBox("Author");
+            Button addPerson = new Button("Add");
+            addPerson.setOnAction(e2 -> {
+                FilmPerson filmPerson = new FilmPerson(nameField.getText(), birthYearField.getText(), countryField.getText(), directorCheck.isSelected(), actorCheck.isSelected(), authorCheck.isSelected());
+                updateFilmPersons();
+            });
+            HBox roleRow = new HBox(nameField, birthYearField, countryField, directorCheck, actorCheck, authorCheck, addPerson);
+            roleRow.setSpacing(10);
+            newPersonContainer.getChildren().add(roleRow);
+        });
         
         Button addMovieButton = new Button("Add movie");
         return new Scene(standardLayout(true, new VBox(movieTitle, movieTitleField, lengthField, publicationYearField, publicationDateField, storylineField, onVideoCheck, rolesContainer, addMovieButton)));
