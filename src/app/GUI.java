@@ -126,29 +126,46 @@ public class GUI{
         review.setPromptText("Your thoughts");
         TextField rating = new TextField();
         rating.setPromptText("Rating (1-10)");
-        Label selectLabel = new Label("Movie/Season/Series to review:");
 
-        Map<String, Integer> movieTitles = movieCtrl.fetchMovieTitles();
-        ComboBox<String> movieSelect = new ComboBox<>(FXCollections.observableList(new ArrayList<>(movieTitles.keySet())));
-
-        Map<String, Integer> seasonTitles = movieCtrl.fetchSeasonTitles();
-        ComboBox<String> seasonSelect = new ComboBox<>(FXCollections.observableList(new ArrayList<>(seasonTitles.keySet())));
-
-        Map<String, Integer> seriesTitles = movieCtrl.fetchSeriesTitles();
+        Label seriesLabel = new Label("Series:");
+        Map<String, Integer> seriesTitles = reviewCtrl.fetchSeriesTitles();
         ComboBox<String> seriesSelect = new ComboBox<>(FXCollections.observableList(new ArrayList<>(seriesTitles.keySet())));
+        VBox seriesContainer = new VBox(seriesLabel, seriesSelect);
+        seriesContainer.setSpacing(10);
+        
+        Label seasonLabel = new Label("Season:");
+        Map<String, Integer> seasonTitles = new HashMap<>();
+        ComboBox<String> seasonSelect = new ComboBox<>();
+        VBox seasonContainer = new VBox(seasonLabel, seasonSelect);
+        seasonContainer.setSpacing(10);
 
-        HBox selectContainer = new HBox(movieSelect, seasonSelect, seriesSelect);
+        Label episodeLabel = new Label("Episode:");
+        Map<String, Integer> episodeTitles = new HashMap<>();
+        ComboBox<String> episodeSelect = new ComboBox<>();
+        VBox episodeContainer = new VBox(episodeLabel, episodeSelect);
+        episodeContainer.setSpacing(10);
+
+        seriesSelect.valueProperty().addListener(e -> {
+            seasonTitles.clear();
+            seasonTitles.putAll(reviewCtrl.fetchSeasonTitles(seriesTitles.get(seriesSelect.getValue())));
+            seasonSelect.setItems(FXCollections.observableList(new ArrayList<>(seasonTitles.keySet())));
+        });
+
+        seasonSelect.valueProperty().addListener(e -> {
+            episodeTitles.clear();
+            episodeTitles.putAll(reviewCtrl.fetchEpisodeTitles(seasonTitles.get(seasonSelect.getValue())));
+            episodeSelect.setItems(FXCollections.observableList(new ArrayList<>(episodeTitles.keySet())));
+        });
+
+        HBox selectContainer = new HBox(seriesContainer, seasonContainer, episodeContainer);
         selectContainer.setSpacing(10);
+
         Button submitReview = new Button("Submit review");
         submitReview.setOnAction(e -> {
-            reviewCtrl.giveReview(review.getText(), Integer.parseInt(rating.getText()), 1, seriesTitles.get(seriesSelect.getValue()), seasonTitles.get(seasonSelect.getValue()), movieTitles.get(movieSelect.getValue()));
-            review.clear();
-            rating.clear();
-            movieSelect.getSelectionModel().clearSelection();
-            seasonSelect.getSelectionModel().clearSelection();
-            seriesSelect.getSelectionModel().clearSelection();
+            reviewCtrl.giveReview(review.getText(), Integer.parseInt(rating.getText()), 1, null, null, episodeTitles.get(episodeSelect.getValue()));
+            updateScene(reviewScene());
         });
-        return new Scene(standardLayout(true, new VBox(reviewTitle, review, rating, selectLabel, selectContainer, submitReview)));
+        return new Scene(standardLayout(true, new VBox(reviewTitle, review, rating, selectContainer, submitReview)));
     }
     public Scene addMovieScene(){
         List<FilmPerson> directorsToAdd = new ArrayList<>();

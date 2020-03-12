@@ -1,6 +1,8 @@
 package app;
 
-import java.sql.PreparedStatement;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReviewCtrl extends DBConn{
     public void giveReview(String Tekst, Integer Rating, Integer BID, Integer SerieID, Integer SesongID, Integer FilmID){
@@ -63,5 +65,47 @@ public class ReviewCtrl extends DBConn{
         }catch(Exception e){
         System.out.println("Database error when inserting review relation:\n" + e);
         }
+    }
+    public Map<String, Integer> fetchEpisodeTitles(int seasonID){
+        Map<String, Integer> episodeTitles = new HashMap<>();
+        try{
+            Statement statement = conn.createStatement();   
+            String query = "select FilmID, Tittel from Film where SesongID=" + seasonID;
+            ResultSet result = statement.executeQuery(query);
+            while(result.next()){
+                episodeTitles.put(result.getString("Tittel"), Integer.parseInt(result.getString("FilmID")));
+            }
+        }catch(Exception e){
+            System.out.println("Database error when fetching movie titles:\n" + e);
+        }
+        return episodeTitles;
+    }
+    public Map<String, Integer> fetchSeasonTitles(int seriesID){
+        Map<String, Integer> seasonTitles = new HashMap<>();
+        try{
+            Statement statement = conn.createStatement();   
+            String query = "select SesongID, Tittel from Sesong where SerieID=" + seriesID;
+            ResultSet result = statement.executeQuery(query);
+            while(result.next()){
+                seasonTitles.put(result.getString("Tittel"), Integer.parseInt(result.getString("SesongID")));
+            }
+        }catch(Exception e){
+            System.out.println("Database error when fetching season titles:\n" + e);
+        }
+        return seasonTitles;
+    }
+    public Map<String, Integer> fetchSeriesTitles(){
+        Map<String, Integer> seriesTitles = new HashMap<>();
+        try{
+            Statement statement = conn.createStatement();   
+            String query = "select SerieID, Tittel from Serie";
+            ResultSet result = statement.executeQuery(query);
+            while(result.next()){
+                seriesTitles.put(result.getString("Tittel"), Integer.parseInt(result.getString("SerieID")));
+            }
+        }catch(Exception e){
+            System.out.println("Database error when fetching series titles:\n" + e);
+        }
+        return seriesTitles;
     }
 }
