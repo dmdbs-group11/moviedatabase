@@ -1,9 +1,6 @@
 package app;
 
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Sesong extends DBConn {
 
@@ -40,5 +37,13 @@ public class Sesong extends DBConn {
     public int getID(){
         return this.sesongID;
     }
-
+    public String getTitle(){
+        return tittel;
+    }
+    public String getStoryline(){
+        return storyline;
+    }
+    public int getSeriesID(){
+        return serieID;
+    }
 }

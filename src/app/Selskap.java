@@ -1,9 +1,6 @@
 package app;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Selskap extends DBConn {
 

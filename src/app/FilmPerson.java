@@ -1,8 +1,5 @@
 package app;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.sql.*;
 
 public class FilmPerson extends DBConn {
