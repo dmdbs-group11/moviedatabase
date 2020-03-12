@@ -21,7 +21,6 @@ public class ProductionCtrl extends DBConn{
         }
         return genres;
     }
-
     public String fetchOneGenreLeadingCompany(String kategoriID){
         String selskap = "";
 
@@ -62,8 +61,6 @@ public class ProductionCtrl extends DBConn{
         }
         return selskap;
     }
-    
-
     public Map<String, String> fetchGenreLeadingCompanies(){
         Map<String, String> genreLeadingCompanies = new HashMap<>();
         Map<String,String> allGenres = fetchGenres();
@@ -74,7 +71,6 @@ public class ProductionCtrl extends DBConn{
 
         return genreLeadingCompanies;
     }
-
     public List<Sesong> fetchSeasons(){
         List<Sesong> seasons = new ArrayList<>();
         try{
@@ -89,7 +85,6 @@ public class ProductionCtrl extends DBConn{
         }
         return seasons;
     }
-
     public List<Selskap> fetchCompanies(){
         List<Selskap> companies = new ArrayList<>();
         try{

@@ -3,12 +3,13 @@ package app;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.sql.*;
 
 public class FilmPerson extends DBConn {
-    private int id;
-    private String name, birthYear, country;
+    private int id, birthYear;
+    private String name, country;
     private boolean director, actor, author;
-    public FilmPerson(int id, String name, String birthYear, String country, boolean director, boolean actor, boolean author){
+    public FilmPerson(int id, String name, int birthYear, String country, boolean director, boolean actor, boolean author){
         this.id = id;
         this.name = name;
         this.birthYear = birthYear;
@@ -17,20 +18,27 @@ public class FilmPerson extends DBConn {
         this.actor = actor;
         this.author = author;
     }
-    public FilmPerson(String name, String birthYear, String country, boolean director, boolean actor, boolean author){
+    public FilmPerson(String name, int birthYear, String country, boolean director, boolean actor, boolean author){
+        this.id = uniqueID("PID", "FilmPerson");
         this.name = name;
         this.birthYear = birthYear;
         this.country = country;
         this.director = director;
         this.actor = actor;
         this.author = author;
-        ActorCtrl actorCtrl = new ActorCtrl();
-        List<FilmPerson> filmPersons = actorCtrl.fetchFilmPersons();
-        List<Integer> usedIDs = new ArrayList<>();
-        for(FilmPerson filmPerson : filmPersons){
-            usedIDs.add(filmPerson.getID());
+        try{
+            PreparedStatement regStatement = conn.prepareStatement("INSERT INTO FilmPerson VALUES ( (?), (?), (?), (?), (?), (?), (?) )");
+            regStatement.setInt(1, id);
+            regStatement.setString(2, name);
+            regStatement.setInt(3, birthYear);
+            regStatement.setString(4, country);
+            regStatement.setBoolean(5, director);
+            regStatement.setBoolean(6, actor);
+            regStatement.setBoolean(7, author);
+            regStatement.execute();
+        }catch(Exception e){
+            System.out.println("Database error when inserting film person:\n" + e);
         }
-        this.id = Collections.max(usedIDs) + 1;
     }
     public int getID(){
         return id;
@@ -38,7 +46,7 @@ public class FilmPerson extends DBConn {
     public String getName(){
         return name;
     }
-    public String getBirthYear(){
+    public int getBirthYear(){
         return birthYear;
     }
     public String getCountry(){

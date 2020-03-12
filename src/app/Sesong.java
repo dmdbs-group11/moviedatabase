@@ -33,7 +33,7 @@ public class Sesong extends DBConn {
             regStatement.setInt(4, serieID);
             regStatement.execute();
         }catch(Exception e){
-            System.out.println("Database error when inserting review:\n" + e);
+            System.out.println("Database error when inserting season:\n" + e);
         }
     }
 
